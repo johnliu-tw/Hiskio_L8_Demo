@@ -7,7 +7,6 @@ import os
 import urllib.request
 import pymysql
 from datetime import date, timedelta
-from docx import Document
 
 options = Options()
 options.experimental_options["prefs"] = {'profile.default_content_settings' : {"images": 2}, 
@@ -21,15 +20,6 @@ connection = pymysql.connect (host='localhost',
                               cursorclass=pymysql.cursors.DictCursor)
                               
 yesterday = str(date.today() - timedelta(days = 1))
-
-document = Document()
-document.add_heading(yesterday + '新媒體報導整理', 0)
-table = document.add_table(rows=1, cols=4)
-hdr_cells = table.rows[0].cells
-hdr_cells[0].text = '標題'
-hdr_cells[1].text = '分享數'
-hdr_cells[2].text = 'Hashtag'
-hdr_cells[3].text = '網站'
 
 try:
     with connection.cursor() as cursor:
@@ -56,12 +46,6 @@ try:
                       '''.format(title, date, share, '科技報橘')
                 cursor.execute(sql)
                 connection.commit()
-                
-                row_cells = table.add_row().cells
-                row_cells[0].text = title
-                row_cells[1].text = share
-                row_cells[2].text = ''
-                row_cells[3].text = '科技報橘'
 
 
         for i in range(1, 3):
@@ -86,12 +70,6 @@ try:
                           '''.format(title, date, tags, 'inside')
                     cursor.execute(sql)
                     connection.commit()
-                    
-                    row_cells = table.add_row().cells
-                    row_cells[0].text = title
-                    row_cells[1].text = ''
-                    row_cells[2].text = tags
-                    row_cells[3].text = 'inside'
 
 
             driver.get('https://technews.tw/page/'+str(i)+'/')
@@ -122,14 +100,6 @@ try:
                     cursor = connection.cursor()
                     cursor.execute(sql)
                     connection.commit()
-                    
-                    row_cells = table.add_row().cells
-                    row_cells[0].text = title
-                    row_cells[1].text = share
-                    row_cells[2].text = tags
-                    row_cells[3].text = '科技新報'
-        
-    document.save(yesterday + '新媒體報告.docx')
     driver.close()
     connection.close()
 
