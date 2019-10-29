@@ -31,24 +31,27 @@ def handle_message(event):
     with connection.cursor() as cursor:   
         cursor = connection.cursor()
         text = 'Nothing should show'
-        if(event.message.text == "yesterday article"):
-            yesterday = str(date.today() - timedelta(days = 1))
-            sql = ''' SELECT * FROM new_media.news where date >={}'''.format(yesterday)
-            cursor.execute(sql)
-            articles = cursor.fetchall()
-            for article in articles:
-                text = text + '''
-                文章標題: {}, 相關tag: {}, 分享數: {}, 來源: {} \n
-                '''.format(article['title'], article['tag'], article['tag'], article['brand'])
-        if(event.message.text == "last week article"):
-            yesterday = str(date.today() - timedelta(weeks = 1))
-            sql = ''' SELECT * FROM new_media.news where date >={}'''.format(yesterday)
-            cursor.execute(sql)
-            articles = cursor.fetchall()
-            for article in articles:
-                text = text + '''
-                文章標題: {}, 相關tag: {}, 分享數: {}, 來源: {} \n
-                '''.format(article['title'], article['tag'], article['tag'], article['brand'])
+        if(event.message.text.find("article") != -1):
+            date = event.message.text.split(' ')[0]
+            brand = event.message.text.split(' ')[2]
+            if( date == 'week' ):
+                time = str(date.today() - timedelta(weeks = 1))
+                sql = ''' SELECT * FROM new_media.news where date >={} and brand = {}'''.format(time, brand)
+                cursor.execute(sql)
+                articles = cursor.fetchall()
+                for article in articles:
+                    text = text + '''
+                    文章標題: {}, 相關tag: {}, 分享數: {}, 來源: {} \n
+                    '''.format(article['title'], article['tag'], article['tag'], article['brand'])
+            else:
+                sql = ''' SELECT * FROM new_media.news where date >={} and brand = {}'''.format(date, brand)
+                cursor.execute(sql)
+                articles = cursor.fetchall()
+                for article in articles:
+                    text = text + '''
+                    文章標題: {}, 相關tag: {}, 分享數: {}, 來源: {} \n
+                    '''.format(article['title'], article['tag'], article['tag'], article['brand'])
+
 
     line_bot_api.reply_message(event.reply_token,TextSendMessage(text=text))
     connection.close()
