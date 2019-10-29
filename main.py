@@ -1,6 +1,7 @@
 import os
 from flask import Flask, request, abort
 import pymysql
+from datetime import date, timedelta
 from linebot import (
     LineBotApi, WebhookHandler
 )
@@ -19,9 +20,8 @@ handler = WebhookHandler('199884981ae351b96e9bb4998308d5e5')
 @app.route('/')
 def hello():
     return "Hello World!"
-
-@app.route('/get_data')
-def get_data():
+@handler.add(MessageEvent, message=TextMessage)
+def handle_message(event):
     connection = pymysql.connect (host='localhost',
                                     user='john',
                                     password='password',
@@ -29,17 +29,28 @@ def get_data():
                                     cursorclass=pymysql.cursors.DictCursor) 
     with connection.cursor() as cursor:   
         cursor = connection.cursor()
-        sql = ''' SELECT * FROM new_media.news'''
-        cursor.execute(sql)
-        data = cursor.fetchall()
-    
+        text = ''
+        if(event.message.text == "昨日文章"):
+            yesterday = str(date.today() - timedelta(days = 1))
+            sql = ''' SELECT * FROM new_media.news where date >={}'''.format(yesterday)
+            cursor.execute(sql)
+            articles = cursor.fetchall()
+            for article in articles:
+                text = text + '''
+                文章標題: {}, 相關tag: {}, 分享數: {}, 來源: {} \n
+                '''.format(article['title'], article['tag'], article['tag'], article['brand'])
+        if(event.message.text == "上週文章"):
+            yesterday = str(date.today() - timedelta(weeks = 1))
+            sql = ''' SELECT * FROM new_media.news where date >={}'''.format(yesterday)
+            cursor.execute(sql)
+            articles = cursor.fetchall()
+            for article in articles:
+                text = text + '''
+                文章標題: {}, 相關tag: {}, 分享數: {}, 來源: {} \n
+                '''.format(article['title'], article['tag'], article['tag'], article['brand'])
+
+    line_bot_api.reply_message(event.reply_token,TextSendMessage(text=text))
     connection.close()
-    return data
-
-@handler.add(MessageEvent, message=TextMessage)
-def handle_message(event):
-  line_bot_api.reply_message(event.reply_token,TextSendMessage(text=event.message.text))
-
 @app.route("/callback", methods=['POST'])
 def callback():
     # get X-Line-Signature header value
