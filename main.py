@@ -51,6 +51,12 @@ def handle_message(event):
                 articles = cursor.fetchall()
                 for article in articles:
                     text = text + '''{}, 相關tag: {}, 分享數: {}, 來源: {} \n\n'''.format(article['title'], article['tag'], article['share'], article['brand'])
+        if(event.message.text.find("facebook") != -1):
+            date = event.message.text.split(' ')[0].decode('utf-8')
+            if( date == 'week' ):
+                text = '本週貼文總觸及人數為 1052 人, 推廣人數為 188 人, 共 55 個讚, 1009 個留言'
+            else:
+                text = date + '的貼文總觸及人數為 43 人, 推廣人數為 22 人, 共 17 個讚, 44 個留言'
         else:
             text = '看謀啦～'
 
