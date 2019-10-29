@@ -1,3 +1,4 @@
+# encoding: utf-8
 import os
 from flask import Flask, request, abort
 import pymysql
@@ -25,12 +26,12 @@ def handle_message(event):
     connection = pymysql.connect (host='localhost',
                                     user='john',
                                     password='password',
-                                    db='news',
+                                    db='new_media',
                                     cursorclass=pymysql.cursors.DictCursor) 
     with connection.cursor() as cursor:   
         cursor = connection.cursor()
-        text = ''
-        if(event.message.text == "昨日文章"):
+        text = 'Nothing should show'
+        if(event.message.text == "yesterday article"):
             yesterday = str(date.today() - timedelta(days = 1))
             sql = ''' SELECT * FROM new_media.news where date >={}'''.format(yesterday)
             cursor.execute(sql)
@@ -39,7 +40,7 @@ def handle_message(event):
                 text = text + '''
                 文章標題: {}, 相關tag: {}, 分享數: {}, 來源: {} \n
                 '''.format(article['title'], article['tag'], article['tag'], article['brand'])
-        if(event.message.text == "上週文章"):
+        if(event.message.text == "last week article"):
             yesterday = str(date.today() - timedelta(weeks = 1))
             sql = ''' SELECT * FROM new_media.news where date >={}'''.format(yesterday)
             cursor.execute(sql)
